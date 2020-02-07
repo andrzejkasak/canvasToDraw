@@ -1,6 +1,6 @@
 let express = require('express'); //załączanie express do serwera
 let app = express(); //wywołanie fukcji tworzącej apliakcję
-let server = app.listen(process.env.PORT); //nasłuchiwanie na portie o nr 3000
+let server = app.listen(3000); //nasłuchiwanie na portie o nr 3000
 app.use(express.static('public')); //hostowanie plików w folderze "public"
 
 console.log("Server is running!");
@@ -8,12 +8,15 @@ console.log("Server is running!");
 let socket = require('socket.io'); //załączenie socket.io
 let io = socket(server);  //połączenie socketa z serverem
 io.sockets.on('connection', newConnection); //połączenie event
-let online = 0;
+
+let ids = [];
+
 function newConnection(socket){
 	console.log('New connection:' + socket.id);
-	online++;
-	io.sockets.emit('count', online);
-	console.log('Online: ' + online + ' instances');
+	ids[ids.length] = socket.id;
+	io.sockets.emit('count', ids);
+	console.log('Online: ' + ids.length + ' instances');
+	
 
 	socket.on('data', getData);
 	function getData(data) {
@@ -31,9 +34,14 @@ function newConnection(socket){
 	socket.on('disconnect', disconnection);
 	function disconnection() {
 		console.log('Disconnected:' + socket.id);
-		online--;
-		io.sockets.emit('count', online);
-		console.log('Online: ' + online + ' instances');
+		for(let i = ids.length-1; i >= 0; i--){
+			if(ids[i] == socket.id){
+				ids.splice(i, 1);
+				break;
+			}
+		}
+		io.sockets.emit('count', ids);
+		console.log('Online: ' + ids.length + ' instances');
 	}
 }
 
