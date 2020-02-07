@@ -14,9 +14,12 @@ let ids = [];
 function newConnection(socket){
 	console.log('New connection:' + socket.id);
 	ids[ids.length] = socket.id;
-	io.sockets.emit('count', ids);
 	console.log('Online: ' + ids.length + ' instances');
 	
+	socket.on('id', getSocketId);
+	function getSocketId() {
+		socket.emit('id', ids, socket.id); //roześlij do własnej inst
+	}
 
 	socket.on('data', getData);
 	function getData(data) {
@@ -40,15 +43,6 @@ function newConnection(socket){
 				break;
 			}
 		}
-		io.sockets.emit('count', ids);
 		console.log('Online: ' + ids.length + ' instances');
 	}
 }
-
-
-
-
-
-
-
-
