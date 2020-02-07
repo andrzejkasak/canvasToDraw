@@ -13,9 +13,9 @@ let ids = [];
 
 function newConnection(socket){
 	console.log('New connection:' + socket.id);
-	//ids[ids.length] = socket.id;
-	//io.sockets.emit('count', ids);
-	//console.log('Online: ' + ids.length + ' instances');
+	ids[ids.length] = socket.id;
+	io.sockets.emit('count', ids);
+	console.log('Online: ' + ids.length + ' instances');
 	
 
 	socket.on('data', getData);
@@ -40,8 +40,8 @@ function newConnection(socket){
 				break;
 			}
 		}
-		//io.sockets.emit('count', ids);
-		//console.log('Online: ' + ids.length + ' instances');
+		io.sockets.emit('count', ids);
+		console.log('Online: ' + ids.length + ' instances');
 	}
 }
 
