@@ -34,7 +34,7 @@ function setup() {
   slB = new Slider(20, barWidth+42, 25, barWidth-40, 1, 50, 5);
   clearCanvas();
   
-  socket = io.connect('localhost:3000');
+  socket = io.connect();
   socket.on('data', drawData);
   socket.on('clear', clearCanvas);
   socket.on('count', getOnline);
