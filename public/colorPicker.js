@@ -59,12 +59,7 @@ class ColorPicker {
     this.csl.display();
 
     
-    if(this.mouseHovering()){
-      strokeWeight(2); 
-      stroke(0, 0, 0);
-      fill(0,0,100);
-      ellipse(mouseX, mouseY, 8, 8);
-    }
+    
     stroke(0, 0, 100);
     fill(this.color.h, this.color.s, this.color.b);
     rect(this.pos.x, this.pos.y+this.siz.y, this.siz.x, this.siz.y/8);
@@ -73,6 +68,13 @@ class ColorPicker {
     stroke(0, 0, 100);
     fill(0,0,0);
     ellipse(this.cpos.x + this.pos.x, this.cpos.y + this.pos.y, 8, 8);
+	
+	if(this.mouseHovering()){
+      strokeWeight(2); 
+      stroke(0, 0, 0);
+      fill(0,0,100);
+      ellipse(mouseX, mouseY, 8, 8);
+    }
   }
 
   

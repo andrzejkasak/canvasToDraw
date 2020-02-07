@@ -1,15 +1,17 @@
 class Slider {
-    constructor(x, y, d, siz, minim, maxim) {
+    constructor(x, y, d, siz, minim, maxim, start) {
         this.x = x;
         this.y = y;
         this.d = d;
         this.s = 0;
-        this.pos = this.x;
+        this.pos = this.x + map(start, minim, maxim, 0, siz);
         this.siz = siz;
         this.minim = minim;
         this.maxim = maxim;
+		this.start = start;
         this.f = 0;
         this.value = minim;
+        this.fvalue = minim;
     }
 
     setState(s) {
@@ -36,15 +38,18 @@ class Slider {
                 this.pos = mouseX;
 
 
-        this.value = round(map(this.pos, this.x, this.x + this.siz, this.minim, this.maxim));
-
+        
+        this.fvalue = map(this.pos, this.x, this.x + this.siz, this.minim, this.maxim);
+		this.value = round(this.fvalue);
+        
+        stroke(255);
+        strokeWeight(2);
         line(this.x, this.y, this.x + this.siz, this.y);
-        let c = 100;
-        fill(c + this.s * (200 - c));
+        let c = 51;
+        fill(c + this.s * (255 - c));
         if (this.hovering() && this.s == 0) {
-                fill(150);
+                fill(100);
         }
-        strokeWeight(1);
         ellipse(this.pos, this.y, this.d, this.d);
         if (this.s) fill(0);
         else fill(255);
