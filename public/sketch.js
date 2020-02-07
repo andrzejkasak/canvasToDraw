@@ -59,7 +59,7 @@ function draw() {
 	
 	if(inBounds()){
     if(leftPressed) {
-		if(!(pmouseX == mouseX && pmouseY == mouseY)){
+		//if(!(pmouseX == mouseX && pmouseY == mouseY)){
 		let data = {
 			px:	pmouseX,
 			py:	pmouseY, 
@@ -74,7 +74,7 @@ function draw() {
 		drawData(data);
 		socket.emit('data', data); //przesyłanie danych do serwera
 		}
-		}
+		//}
 	}
 	}
 
