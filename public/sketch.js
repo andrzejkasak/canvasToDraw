@@ -1,6 +1,6 @@
 let canvas;
 let leftPressed = false;
-let wWidth = 1200, wHeight = 600;
+let wWidth = 1400, wHeight = 600;
 let socket;
 let div;
 let cp;
@@ -20,27 +20,32 @@ function setup() {
   //inp = createInput();
   
   clrButton = new Button("CLEAR", 
-  barWidth/2 - 50, barWidth+130, 100, 40, clearClicked);
+  barWidth/2 - 50, barWidth+136, 100, 40, clearClicked);
   colorMode(HSB, 100);
   
   brshButton = new Button("", 
-  20, barWidth+60, 60, 60, brushClicked);
+  20, barWidth+66, 60, 60, brushClicked);
   rubButton = new Button("R", 
-  86, barWidth+60, 60, 60, rubberClicked);
+  86, barWidth+66, 60, 60, rubberClicked);
   bcktButton = new Button("B", 
-  152, barWidth+60, 60, 60, bucketClicked);
+  152, barWidth+66, 60, 60, bucketClicked);
   
   cp = new ColorPicker(20,40,barWidth-40,barWidth-40);
-  slB = new Slider(20, barWidth+42, 25, barWidth-40, 1, 50, 5);
+  slB = new Slider(20, barWidth+45, 25, barWidth-40, 1, 50, 5);
   clearCanvas();
   
-  socket = io.connect();
+  socket = io.connect('localhost:3000');
   socket.on('data', drawData);
   socket.on('clear', clearCanvas);
-  socket.on('count', getOnline);
+  socket.on('id', getId);
 }
 
+
+
 function draw() {
+	socket.emit('id');
+	
+	
 	canvas.position(windowWidth/2-wWidth/2, windowHeight/2-wHeight/2);
 	if(!drawing){
 		inp.position(windowWidth/2-20, windowHeight/2-18);
@@ -59,7 +64,7 @@ function draw() {
 	
 	if(inBounds()){
     if(leftPressed) {
-		//if(!(pmouseX == mouseX && pmouseY == mouseY)){
+		if(!(pmouseX == mouseX && pmouseY == mouseY)){
 		let data = {
 			px:	pmouseX,
 			py:	pmouseY, 
@@ -74,7 +79,7 @@ function draw() {
 		drawData(data);
 		socket.emit('data', data); //przesyłanie danych do serwera
 		}
-		//}
+		}
 	}
 	}
 
@@ -89,7 +94,22 @@ function draw() {
 	rect(wWidth-barWidth, 0, barWidth, wHeight);
 	rect(0, 0, barWidth, wHeight);
 	
-	fill(100);
+	
+	if(tool == 1){
+		brshButton.chosen = true;
+		rubButton.chosen = false;
+		bcktButton.chosen = false;
+	}
+	if(tool == 2){
+		brshButton.chosen = false;
+		rubButton.chosen = true;
+		bcktButton.chosen = false;
+	}
+	if(tool == 3){
+		brshButton.chosen = false;
+		rubButton.chosen = false;
+		bcktButton.chosen = true;
+	}
 	
 	cp.draw();
 	slB.display();
@@ -99,14 +119,14 @@ function draw() {
 	clrButton.display();
 	fill(100);
 	noStroke();
-	ellipse(50, barWidth+90, slB.value, slB.value)
+	ellipse(50, barWidth+96, slB.value, slB.value)
 	
 	textSize(12);
 	noStroke();
 	fill(100);
 	if(usrIds != null){
-	text('ONLINE: ' + usrIds.length.toString()+' user(s)', wWidth - barWidth + 20,
-	20, 200, 20);
+	text('ONLINE: ' + usrIds.length.toString()+' user(s)', 
+	wWidth - barWidth + 10,10, 200, 20);
 	
 	for(let i = 0; i < usrIds.length; i++){
 		if(myId == usrIds[i]){
@@ -115,8 +135,8 @@ function draw() {
 		else {
 			fill(100);
 		}
-		text( 'USER '+(i+1).toString()+': '+usrIds[i], 
-		wWidth - barWidth + 20, (i+2)*20, 300, 20);
+		text( 'USER'+(i+1).toString()+'ID: '+usrIds[i], 
+		wWidth - barWidth + 10, (i+2)*20-10, 300, 20);
 	}
 	}
 	
@@ -144,12 +164,8 @@ function clearCanvas(){
 	}
 }
 
-let flag = true;
-function getOnline(ids){
-	if(flag) {
-		myId = ids[ids.length-1];
-		flag = false;
-	}
+function getId(ids, id){
+	myId = id;
 	usrIds = ids;
 }
 
@@ -161,12 +177,12 @@ function clearClicked(){
 let oldX, oldY;
 
 function brushClicked(){
-	if(tool!=1){
-	tool = 1;
-	if(oldX != null && oldY != null){
+	if(tool == 2 && oldX != null && oldY != null){
 	cp.cpos.x = oldX;
 	cp.cpos.y = oldY;
 	}
+	if(tool!=1){
+	tool = 1;
 	}
 }
 
@@ -181,7 +197,12 @@ function rubberClicked(){
 }
 	
 function bucketClicked(){
+	if(tool == 2 && oldX != null && oldY != null){
+	cp.cpos.x = oldX;
+	cp.cpos.y = oldY;
+	}
 	if(tool!=3){
 	tool = 3;
+	
 	}
 }

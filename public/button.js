@@ -10,7 +10,7 @@ class Button {
     this.f = 0;
     this.fun = fun;
     this.arg = arg;
-
+	this.chosen = false;
   }
 
   setFunc(f, arg) {
@@ -50,7 +50,8 @@ class Button {
 
     this.setFunc(this.fun, this.arg);
 
-    stroke(0,0,100);
+    if(!this.chosen)stroke(0,0,100);
+	else stroke(30, 100, 100);
     let c = 20;
     fill(c + this.s * (80 - c));
     if (this.hovering() && this.s == 0) {
