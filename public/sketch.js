@@ -1,6 +1,6 @@
 let canvas;
 let leftPressed = false;
-let wWidth = 1080, wHeight = 540;
+let wWidth = 1400, wHeight = 600;
 let socket;
 let div;
 let cp;
@@ -13,15 +13,17 @@ let tool = 1;
 let myId;
 let drawing = true;
 let inp;
+let flag = true;
 
 function setup() {
   canvas = createCanvas(wWidth, wHeight);
-  
+  colorMode(HSB, 100);
+ 
   //inp = createInput();
   
   clrButton = new Button("CLEAR", 
   barWidth/2 - 50, barWidth+136, 100, 40, clearClicked);
-  colorMode(HSB, 100);
+  
   
   brshButton = new Button("", 
   20, barWidth+66, 60, 60, brushClicked);
@@ -31,12 +33,13 @@ function setup() {
   152, barWidth+66, 60, 60, bucketClicked);
   
   cp = new ColorPicker(20,40,barWidth-40,barWidth-40);
-  slB = new Slider(20, barWidth+45, 25, barWidth-40, 1, 50, 5);
+  slB = new Slider(20, barWidth+45, 25, barWidth-40, 6, 50, 6);
   clearCanvas();
   
   socket = io.connect();
   socket.on('data', drawData);
   socket.on('clear', clearCanvas);
+  socket.on('fill', fillIn);
   socket.on('id', getId);
 }
 
@@ -59,12 +62,14 @@ function draw() {
 	if(mouseIsPressed){
 		if(mouseButton === LEFT) leftPressed = true;
 	}else{
-		if(mouseButton === LEFT) leftPressed = false;
+		if(mouseButton === LEFT) {
+			leftPressed = false;
+			flag = true;
+		}
 	}
 	
 	if(inBounds()){
     if(leftPressed) {
-		if(!(pmouseX == mouseX && pmouseY == mouseY)){
 		let data = {
 			px:	pmouseX,
 			py:	pmouseY, 
@@ -75,10 +80,17 @@ function draw() {
 			b:	cp.color.b,
 			bd: slB.value
 		}
+		if(!(pmouseX == mouseX && pmouseY == mouseY)){
 		if(tool == 1 || tool == 2){
-		drawData(data);
-		socket.emit('data', data); //przesyłanie danych do serwera
+			drawData(data);
+			socket.emit('data', data); //przesyłanie danych do serwera
 		}
+		}
+		
+		if(tool == 3 && flag){
+			flag = false;
+			fillIn(data); //do poprawy funkcja
+			socket.emit('fill', data); //przesyłanie danych do serwera
 		}
 	}
 	}
@@ -117,6 +129,7 @@ function draw() {
 	rubButton.display();
 	bcktButton.display();
 	clrButton.display();
+	
 	fill(100);
 	noStroke();
 	ellipse(50, barWidth+96, slB.value, slB.value)
@@ -152,10 +165,61 @@ function inBounds(){
 
 function drawData(data){
 	if(drawing){
-	stroke(data.h, data.s, data.b);
-	strokeWeight(data.bd);
-	line(data.px, data.py, data.x, data.y);
+		stroke(data.h, data.s, data.b);
+		strokeWeight(data.bd);
+		line(data.px, data.py, data.x, data.y);
 	}
+	
+}
+
+function fillIn(d){
+	let fColor = color(get(d.x, d.y));
+	
+	let n = 5;
+	let pts = [];
+	
+	pts[pts.length] = createVector(d.x,d.y);
+	noStroke();
+	fill(d.h, d.s, d.b);
+	
+	//stroke(cp.color.h, cp.color.s, cp.color.b);
+	for(let i = 0; i < pts.length; i++){
+		//print(pts.length);
+		if(pts.length > 50000) break;
+		
+		//point(pts[i].x, pts[i].y);
+		
+		if(pts[i].x >= barWidth && pts[i].y >= 0 && pts[i].x <= wWidth-barWidth && pts[i].y <= wHeight) {	
+		c = color(get(pts[i].x-n,pts[i].y));
+		if(c.levels[0]==fColor.levels[0] && c.levels[1]==fColor.levels[1] && c.levels[2]==fColor.levels[2]){
+			//fillIn(x-10,y);
+			pts[pts.length] = createVector(pts[i].x-n,pts[i].y);
+			ellipse(pts[i].x-n, pts[i].y,1.4*n,1.4*n);
+		}
+		c = color(get(pts[i].x+n,pts[i].y));
+		if(c.levels[0]==fColor.levels[0] && c.levels[1]==fColor.levels[1] && c.levels[2]==fColor.levels[2]){
+			//fillIn(x+10,y);
+			pts[pts.length] = createVector(pts[i].x+n,pts[i].y);
+			ellipse(pts[i].x+n, pts[i].y,1.4*n,1.4*n);
+		}
+		c = color(get(pts[i].x,pts[i].y-n));
+		if(c.levels[0]==fColor.levels[0] && c.levels[1]==fColor.levels[1] && c.levels[2]==fColor.levels[2]){
+			//fillIn(x,y-10);
+			pts[pts.length] = createVector(pts[i].x,pts[i].y-n);
+			ellipse(pts[i].x, pts[i].y-n,1.4*n,1.4*n);
+		}
+		c = color(get(pts[i].x,pts[i].y+n));
+		if(c.levels[0]==fColor.levels[0] && c.levels[1]==fColor.levels[1] && c.levels[2]==fColor.levels[2]){
+			//fillIn(x,y+10);
+			pts[pts.length] = createVector(pts[i].x,pts[i].y+n);
+			ellipse(pts[i].x, pts[i].y+n,1.4*n,1.4*n);
+		}
+		//pts.splice(0,1);
+	}
+	}
+	
+	//delete pts;
+	
 }
 
 function clearCanvas(){
