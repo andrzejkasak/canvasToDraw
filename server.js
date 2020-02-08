@@ -34,6 +34,12 @@ function newConnection(socket){
 		socket.broadcast.emit('clear');
 	}
 	
+	socket.on('fill', sendFill);
+	function sendFill(data){
+		console.log('Fill send!');
+		socket.broadcast.emit('fill', data);
+	}
+	
 	socket.on('disconnect', disconnection);
 	function disconnection() {
 		console.log('Disconnected:' + socket.id);
