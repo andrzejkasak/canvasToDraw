@@ -1,6 +1,6 @@
 let canvas;
 let leftPressed = false;
-let wWidth = 1080, wHeight = 600;
+let wWidth = 1200, wHeight = 600;
 let socket;
 let div;
 let cp;
@@ -49,9 +49,29 @@ function setup() {
   socket.on('clear', clearCanvas);
   socket.on('fill', fillIn);
   socket.on('id', getId);
+  socket.on('sound', playSound);
+  socket.on('redraw', redrawCanv);
 }
 
+function playSound(sndNb){
+	switch(sndNb){
+		case 1: getIn.play(); break;
+		case 2: getOut.play(); break;
+	}
+}
 
+function redrawCanv(drawSeq){
+	for(let i = 0; i < drawSeq.length; i++){
+		if(drawSeq[i].tl == 1 || drawSeq[i].tl == 2){
+			drawData(drawSeq[i]);
+		}
+		if(drawSeq[i].tl == 3){
+			fillIn(drawSeq[i]);
+		}
+		
+	}
+	
+}
 
 function draw() {
 	socket.emit('id');
@@ -67,7 +87,9 @@ function draw() {
 	}else{
 	
 	if(mouseIsPressed){
-		if(mouseButton === LEFT) leftPressed = true;
+		if(mouseButton === LEFT) {
+			leftPressed = true;	
+		}
 	}else{
 		if(mouseButton === LEFT) {
 			leftPressed = false;
@@ -85,8 +107,10 @@ function draw() {
 			h:	cp.color.h, 
 			s:	cp.color.s, 
 			b:	cp.color.b,
-			bd: slB.value
+			bd: slB.value,
+			tl: tool
 		}
+		
 		if(!(pmouseX == mouseX && pmouseY == mouseY)){
 		if(tool == 1 || tool == 2){
 			drawData(data);
@@ -96,7 +120,7 @@ function draw() {
 		
 		if(tool == 3 && flag){
 			flag = false;
-			fillIn(data); //do poprawy funkcja
+			fillIn(data); //do poprawy funkcja, średnio działa
 			socket.emit('fill', data); //przesyłanie danych do serwera
 		}
 	}
@@ -192,7 +216,7 @@ function fillIn(d){
 	//stroke(cp.color.h, cp.color.s, cp.color.b);
 	for(let i = 0; i < pts.length; i++){
 		//print(pts.length);
-		if(pts.length > 50000) break;
+		if(pts.length > 30000) break;
 		
 		//point(pts[i].x, pts[i].y);
 		
@@ -236,21 +260,8 @@ function clearCanvas(){
 }
 
 function getId(ids, id){
-	let len = 0;
-	if(usrIds != null) {
-		len = usrIds.length;
-	}
-	
 	myId = id;
 	usrIds = ids;
-	
-	if(usrIds != null && usrIds.length > len) {
-		getIn.play();
-	}
-	if(usrIds != null && usrIds.length < len){
-		getOut.play();
-	}
-	
 }
 
 function clearClicked(){
