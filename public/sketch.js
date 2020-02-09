@@ -15,6 +15,14 @@ let drawing = true;
 let inp;
 let flag = true;
 
+let getIn, getOut;
+
+function preload(){
+	getIn = loadSound('sounds/getIn.wav');
+	getOut = loadSound('sounds/getOut.wav');
+	
+}
+
 function setup() {
   canvas = createCanvas(wWidth, wHeight);
   colorMode(HSB, 100);
@@ -47,7 +55,6 @@ function setup() {
 
 function draw() {
 	socket.emit('id');
-	
 	
 	canvas.position(windowWidth/2-wWidth/2, windowHeight/2-wHeight/2);
 	if(!drawing){
@@ -229,8 +236,21 @@ function clearCanvas(){
 }
 
 function getId(ids, id){
+	let len = 0;
+	if(usrIds != null) {
+		len = usrIds.length;
+	}
+	
 	myId = id;
 	usrIds = ids;
+	
+	if(usrIds != null && usrIds.length > len) {
+		getIn.play();
+	}
+	if(usrIds != null && usrIds.length < len){
+		getOut.play();
+	}
+	
 }
 
 function clearClicked(){
