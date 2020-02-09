@@ -10,11 +10,15 @@ let io = socket(server);  //połączenie socketa z serverem
 io.sockets.on('connection', newConnection); //połączenie event
 
 let ids = [];
+let dataSeq = [];
 
 function newConnection(socket){
 	console.log('New connection:' + socket.id);
 	ids[ids.length] = socket.id;
 	console.log('Online: ' + ids.length + ' instances');
+	
+	socket.broadcast.emit('sound', 1);
+	socket.emit('redraw', dataSeq);
 	
 	socket.on('id', getSocketId);
 	function getSocketId() {
@@ -24,6 +28,7 @@ function newConnection(socket){
 	socket.on('data', getData);
 	function getData(data) {
 		console.log(data);
+		dataSeq[dataSeq.length] = data;
 		socket.broadcast.emit('data', data); //roześlij do wszystkich instancji prócz własnej
 		//io.sockets.emit('data', data);  // roześlij do wszystkich włącznie z własną
 	}
@@ -32,11 +37,13 @@ function newConnection(socket){
 	function sendClear(){
 		console.log('Clear send!');
 		socket.broadcast.emit('clear');
+		dataSeq = [];
 	}
 	
 	socket.on('fill', sendFill);
 	function sendFill(data){
 		console.log('Fill send!');
+		dataSeq[dataSeq.length] = data;
 		socket.broadcast.emit('fill', data);
 	}
 	
@@ -50,5 +57,6 @@ function newConnection(socket){
 			}
 		}
 		console.log('Online: ' + ids.length + ' instances');
+		socket.broadcast.emit('sound', 2);
 	}
 }
