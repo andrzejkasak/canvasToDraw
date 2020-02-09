@@ -1,6 +1,6 @@
 let canvas;
 let leftPressed = false;
-let wWidth = 1400, wHeight = 600;
+let wWidth = 1080, wHeight = 600;
 let socket;
 let div;
 let cp;
